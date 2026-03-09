@@ -1,5 +1,23 @@
 use std::io::BufRead;
 
+// https://doc.rust-lang.org/std/io/trait.BufRead.html
+//
+// pub trait BufRead: Read {
+//     // Required methods
+//     fn fill_buf(&mut self) -> Result<&[u8]>;
+//     fn consume(&mut self, amount: usize);
+
+//     // Provided methods
+//     fn has_data_left(&mut self) -> Result<bool> { ... }
+//     fn read_until(&mut self, byte: u8, buf: &mut Vec<u8>) -> Result<usize> { ... }
+//     fn skip_until(&mut self, byte: u8) -> Result<usize> { ... }
+//     fn read_line(&mut self, buf: &mut String) -> Result<usize> { ... }
+//     fn split(self, byte: u8) -> Split<Self> ⓘ
+//        where Self: Sized { ... }
+//     fn lines(self) -> Lines<Self> ⓘ
+//        where Self: Sized { ... }
+// }
+
 fn read_file_proper_ish() -> std::io::Result<()> {
     let path = match std::env::current_dir() {
         Ok(path) => path.join("src/lines"),
@@ -15,6 +33,8 @@ fn read_file_proper_ish() -> std::io::Result<()> {
     // Wrap the file in a Buffer
     let reader = std::io::BufReader::new(handle);
 
+    // BufRead is a trait that BufReader implements;
+    // allowing the below equivalent of "for line_result in std::io::BufRead::lines(reader)"
     for line_result in reader.lines() {
         match line_result {
             Ok(line) => println!("{line}"),
