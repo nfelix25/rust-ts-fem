@@ -1,6 +1,9 @@
+use std::fmt::Display;
+
 use super::point::Point;
 use crate::_area::Area;
 
+#[derive(Clone, Copy, Debug)]
 pub struct Rect {
     pub origin: Point,
     pub width: f64,
@@ -10,5 +13,109 @@ pub struct Rect {
 impl Area for Rect {
     fn area(&self) -> f64 {
         self.width * self.height
+    }
+}
+
+impl Default for Rect {
+    fn default() -> Self {
+        Rect {
+            origin: Point { x: 0.0, y: 0.0 },
+            width: 10.0,
+            height: 10.0,
+        }
+    }
+}
+
+impl Display for Rect {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Rectangle ({}, {}): {}x{} - {}",
+            self.origin.x,
+            self.origin.y,
+            self.width,
+            self.height,
+            self.area()
+        )
+    }
+}
+
+impl Rect {
+    pub fn get_point(&self, point: usize) -> Result<Point, String> {
+        if point == 0 || point > 4 {
+            return Err(format!("Rect only has 4 points, but got {}", point));
+        }
+
+        let mults: (f64, f64) = match point {
+            1 => (1.0, 1.0),
+            2 => (-1.0, 1.0),
+            3 => (-1.0, -1.0),
+            4 => (1.0, -1.0),
+            _ => unreachable!(),
+        };
+
+        Ok(Point {
+            x: self.origin.x + mults.0 * self.width / 2.0,
+            y: self.origin.y + mults.1 * self.height / 2.0,
+        })
+    }
+
+    fn points(self) -> [Point; 4] {
+        [1, 2, 3, 4].map(|i| self.get_point(i).unwrap())
+    }
+}
+
+pub struct RectIter {
+    points: [Point; 4],
+    idx: usize,
+}
+
+impl RectIter {
+    fn new<'a>(rect: &'a Rect) -> Self {
+        RectIter {
+            points: rect.points(),
+            idx: 0,
+        }
+    }
+}
+
+// allows for ret.into() to infer the type of RectIter and call the from function to create it
+impl From<Rect> for RectIter {
+    fn from(rect: Rect) -> Self {
+        RectIter {
+            points: rect.points(),
+            idx: 0,
+        }
+    }
+}
+
+impl Iterator for RectIter {
+    type Item = Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.idx >= 4 {
+            return None;
+        }
+        let p = self.points[self.idx];
+        self.idx += 1;
+        Some(p)
+    }
+}
+
+impl IntoIterator for Rect {
+    type Item = Point;
+    type IntoIter = RectIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.into()
+    }
+}
+
+impl<'a> IntoIterator for &'a Rect {
+    type Item = Point;
+    type IntoIter = RectIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        RectIter::new(self)
     }
 }
