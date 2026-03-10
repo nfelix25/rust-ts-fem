@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use super::point::Point;
+use super::point::{Contains, Point, PointIter, Points};
 use crate::_area::Area;
 
 #[derive(Clone, Copy, Debug)]
@@ -60,62 +60,87 @@ impl Rect {
         })
     }
 
-    fn points(self) -> [Point; 4] {
-        [1, 2, 3, 4].map(|i| self.get_point(i).unwrap())
-    }
-}
+    fn points(self) -> PointIter {
+        let mut vec: Vec<Point> = Vec::new();
 
-pub struct RectIter {
-    points: [Point; 4],
-    idx: usize,
-}
-
-impl RectIter {
-    fn new<'a>(rect: &'a Rect) -> Self {
-        RectIter {
-            points: rect.points(),
-            idx: 0,
+        for i in 1..=4 {
+            vec.push(self.get_point(i).unwrap())
         }
+
+        return vec.into();
     }
 }
+
+// Point iter is able to replace all RectIter ... relaed code
+
+// pub struct RectIter {
+//     points: PointIter,
+//     idx: usize,
+// }
+
+// impl RectIter {
+//     fn new<'a>(rect: &'a Rect) -> Self {
+//         RectIter {
+//             points: rect.points(),
+//             idx: 0,
+//         }
+//     }
+// }
 
 // allows for ret.into() to infer the type of RectIter and call the from function to create it
-impl From<Rect> for RectIter {
-    fn from(rect: Rect) -> Self {
-        RectIter {
-            points: rect.points(),
-            idx: 0,
-        }
+// impl From<Rect> for RectIter {
+//     fn from(rect: Rect) -> Self {
+//         RectIter {
+//             points: rect.points(),
+//             idx: 0,
+//         }
+//     }
+// }
+
+// impl Iterator for RectIter {
+//     type Item = Point;
+
+//     fn next(&mut self) -> Option<Self::Item> {
+//         if self.idx >= 4 {
+//             return None;
+//         }
+//         let p = self.points.nth(self.idx).unwrap();
+//         self.idx += 1;
+//         Some(p)
+//     }
+// }
+
+// impl IntoIterator for Rect {
+//     type Item = Point;
+//     type IntoIter = RectIter;
+
+//     fn into_iter(self) -> Self::IntoIter {
+//         self.into()
+//     }
+// }
+
+// impl<'a> IntoIterator for &'a Rect {
+//     type Item = Point;
+//     type IntoIter = RectIter;
+
+//     fn into_iter(self) -> Self::IntoIter {
+//         RectIter::new(self)
+//     }
+// }
+
+impl Contains for Rect {
+    fn contains_point(&self, Point { x, y }: Point) -> bool {
+        // Should just determine distances, but being lazy
+        let mut points = self.points();
+        let top_left = points.nth(1).unwrap();
+        let bottom_right = points.nth(1).unwrap();
+
+        x >= top_left.x && x <= bottom_right.x && y >= bottom_right.y && y <= top_left.y
     }
 }
 
-impl Iterator for RectIter {
-    type Item = Point;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.idx >= 4 {
-            return None;
-        }
-        let p = self.points[self.idx];
-        self.idx += 1;
-        Some(p)
-    }
-}
-
-impl IntoIterator for Rect {
-    type Item = Point;
-    type IntoIter = RectIter;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.into()
-    }
-}
-
-impl<'a> IntoIterator for &'a Rect {
-    type Item = Point;
-    type IntoIter = RectIter;
-
-    fn into_iter(self) -> Self::IntoIter {
-        RectIter::new(self)
+impl Points for Rect {
+    fn points(&self) -> PointIter {
+        return self.clone().points();
     }
 }
