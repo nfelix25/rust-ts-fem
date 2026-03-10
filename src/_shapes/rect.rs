@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
 
 use super::point::{Contains, Point, PointIter, Points};
 use crate::_area::Area;
@@ -142,5 +142,28 @@ impl Contains for Rect {
 impl Points for Rect {
     fn points(&self) -> PointIter {
         return self.clone().points();
+    }
+}
+
+impl FromStr for Rect {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts = s.split(" ").collect::<Vec<_>>();
+        if parts.len() != 4 {
+            return Err(anyhow::anyhow!(
+                "Rect should be in format 'x y width height', but got '{}'",
+                s
+            ));
+        }
+
+        return Ok(Rect {
+            origin: Point {
+                x: parts[0].parse()?,
+                y: parts[1].parse()?,
+            },
+            width: parts[2].parse()?,
+            height: parts[3].parse()?,
+        });
     }
 }

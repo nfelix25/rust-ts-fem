@@ -3,11 +3,16 @@ mod _collidable;
 mod _shapes;
 
 use _area::Area;
-use _shapes::{circle::Circle, point::Contains, point::Point, point::Points, rect::Rect};
+use _shapes::{
+    circle::Circle, point::Contains, point::Point, point::PointIter, point::Points, rect::Rect,
+};
 
 use crate::_collidable::Collidable;
+use std::str::FromStr;
 
-fn main() {
+use anyhow::Result;
+
+fn main() -> Result<()> {
     let rect = Rect {
         origin: Point { x: 1.5, y: 0.5 },
         width: 7.0,
@@ -93,4 +98,68 @@ fn main() {
 
     println!("Circle c1 collides with rect: is {}", c1.collide(&r1));
     println!("Rect r1 collides with circle: is {}", r1.collide(&c1));
+
+    #[derive(Debug)]
+    enum Shape {
+        Circle(Circle),
+        Rect(Rect),
+    }
+
+    impl FromStr for Shape {
+        type Err = anyhow::Error;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            let (shape, data) = s.split_once(" ").unwrap_or(("", ""));
+
+            match shape {
+                "rect" => return Ok(Shape::Rect(data.parse()?)),
+                "circle" => return Ok(Shape::Circle(data.parse()?)),
+                _ => return Err(anyhow::anyhow!("Bad!!!!!!!!!!")),
+            }
+        }
+    }
+
+    impl Points for Shape {
+        fn points(&self) -> PointIter {
+            match self {
+                Shape::Circle(c) => c.points(),
+                Shape::Rect(r) => r.points(),
+            }
+        }
+    }
+
+    impl Contains for Shape {
+        fn contains_point(&self, point: Point) -> bool {
+            match self {
+                Shape::Circle(c) => c.contains_point(point),
+                Shape::Rect(r) => r.contains_point(point),
+            }
+        }
+    }
+
+    // Read in 4 shapes from file "shapes"
+    let shapes: Vec<Shape> = std::fs::read_to_string("src/shapes")
+        .expect("failed to parse")
+        .lines()
+        // .for_each(|line| println!("Line: {line}"));
+        .filter_map(|x| x.parse::<Shape>().ok())
+        .collect();
+
+    for i in 2..=3 {
+        // Print out cillisions between shapes[i], shapes[i - 1], and shapes[i + 1]
+        println!(
+            "Shape {} collides with shape {}: is {}",
+            i,
+            i - 1,
+            shapes[i].collide(&shapes[i - 1])
+        );
+        println!(
+            "Shape {} collides with shape {}: is {}",
+            i,
+            i + 1,
+            shapes[i].collide(&shapes[i - 1])
+        );
+    }
+
+    return Ok(());
 }
