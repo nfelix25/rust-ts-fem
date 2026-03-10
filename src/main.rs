@@ -30,7 +30,10 @@ fn main() -> Result<()> {
 
     // Implementing Display gives us to_string as well via the ToString trait
     // Literally, "This trait is automatically implemented for any type which implements the Display trait. As such, ToString shouldn’t be implemented directly: Display should be implemented instead, and you get the ToString implementation for free."
-    println!("{}", rect.to_string());
+    //
+    // Clippy complains if to_string is called when display exists
+    // println!("{}", rect.to_string());
+    println!("{rect}");
 
     println!("Default Rectangle: {}", Rect::default());
 
@@ -99,7 +102,7 @@ fn main() -> Result<()> {
     println!("Circle c1 collides with rect: is {}", c1.collide(&r1));
     println!("Rect r1 collides with circle: is {}", r1.collide(&c1));
 
-    #[derive(Copy, Debug)]
+    #[derive(Clone, Copy, Debug)]
     enum Shape {
         Circle(Circle),
         Rect(Rect),
@@ -112,9 +115,9 @@ fn main() -> Result<()> {
             let (shape, data) = s.split_once(" ").unwrap_or(("", ""));
 
             match shape {
-                "rect" => return Ok(Shape::Rect(data.parse()?)),
-                "circle" => return Ok(Shape::Circle(data.parse()?)),
-                _ => return Err(anyhow::anyhow!("Bad!!!!!!!!!!")),
+                "rect" => Ok(Shape::Rect(data.parse()?)),
+                "circle" => Ok(Shape::Circle(data.parse()?)),
+                _ => Err(anyhow::anyhow!("Bad!!!!!!!!!!")),
             }
         }
     }
@@ -133,16 +136,6 @@ fn main() -> Result<()> {
             match self {
                 Shape::Circle(c) => c.contains_point(point),
                 Shape::Rect(r) => r.contains_point(point),
-            }
-        }
-    }
-
-    // Could and should just derive Clone, but doing manually for demonstration
-    impl Clone for Shape {
-        fn clone(&self) -> Self {
-            match self {
-                Shape::Circle(circle) => Shape::Circle(*circle),
-                Shape::Rect(rect) => Shape::Rect(*rect),
             }
         }
     }
@@ -180,5 +173,5 @@ fn main() -> Result<()> {
         );
     }
 
-    return Ok(());
+    Ok(())
 }

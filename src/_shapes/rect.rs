@@ -157,13 +157,13 @@ impl FromStr for Rect {
             ));
         }
 
-        return Ok(Rect {
+        Ok(Rect {
             origin: Point {
                 x: parts[0].parse()?,
                 y: parts[1].parse()?,
             },
             width: parts[2].parse()?,
             height: parts[3].parse()?,
-        });
+        })
     }
 }

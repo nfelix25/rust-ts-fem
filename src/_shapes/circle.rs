@@ -43,12 +43,12 @@ impl FromStr for Circle {
             ));
         }
 
-        return Ok(Circle {
+        Ok(Circle {
             origin: Point {
                 x: parts[0].parse()?,
                 y: parts[1].parse()?,
             },
             radius: parts[2].parse()?,
-        });
+        })
     }
 }
