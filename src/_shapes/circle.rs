@@ -3,7 +3,7 @@ use std::str::FromStr;
 use super::point::{Contains, Point, PointIter, Points};
 use crate::_area::Area;
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Circle {
     pub origin: Point,
     pub radius: f64,
@@ -21,7 +21,7 @@ impl Contains for Circle {
 
 impl Points for Circle {
     fn points(&self) -> PointIter {
-        return vec![self.origin].into();
+        vec![self.origin].into()
     }
 }
 

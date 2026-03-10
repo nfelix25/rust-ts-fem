@@ -99,7 +99,7 @@ fn main() -> Result<()> {
     println!("Circle c1 collides with rect: is {}", c1.collide(&r1));
     println!("Rect r1 collides with circle: is {}", r1.collide(&c1));
 
-    #[derive(Debug)]
+    #[derive(Copy, Debug)]
     enum Shape {
         Circle(Circle),
         Rect(Rect),
@@ -137,6 +137,16 @@ fn main() -> Result<()> {
         }
     }
 
+    // Could and should just derive Clone, but doing manually for demonstration
+    impl Clone for Shape {
+        fn clone(&self) -> Self {
+            match self {
+                Shape::Circle(circle) => Shape::Circle(*circle),
+                Shape::Rect(rect) => Shape::Rect(*rect),
+            }
+        }
+    }
+
     // Read in 4 shapes from file "shapes"
     let shapes: Vec<Shape> = std::fs::read_to_string("src/shapes")
         .expect("failed to parse")
@@ -145,7 +155,7 @@ fn main() -> Result<()> {
         .filter_map(|x| x.parse::<Shape>().ok())
         .collect();
 
-    for i in 2..=3 {
+    for i in 1..=2 {
         // Print out cillisions between shapes[i], shapes[i - 1], and shapes[i + 1]
         println!(
             "Shape {} collides with shape {}: is {}",
@@ -157,7 +167,16 @@ fn main() -> Result<()> {
             "Shape {} collides with shape {}: is {}",
             i,
             i + 1,
-            shapes[i].collide(&shapes[i - 1])
+            shapes[i].collide(&shapes[i + 1])
+        );
+
+        let adj = vec![shapes[i - 1], shapes[i + 1]];
+
+        // Now check both at once using collides
+        println!(
+            "Shape {} collides with either is: {}",
+            i,
+            shapes[i].collides(&adj)
         );
     }
 

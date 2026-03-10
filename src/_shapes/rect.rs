@@ -67,7 +67,7 @@ impl Rect {
             vec.push(self.get_point(i).unwrap())
         }
 
-        return vec.into();
+        vec.into()
     }
 }
 
@@ -141,7 +141,7 @@ impl Contains for Rect {
 
 impl Points for Rect {
     fn points(&self) -> PointIter {
-        return self.clone().points();
+        (*self).points()
     }
 }
 

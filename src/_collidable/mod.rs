@@ -7,6 +7,6 @@ pub trait Collidable<T> {
                 return true;
             }
         }
-        return false;
+        false
     }
 }

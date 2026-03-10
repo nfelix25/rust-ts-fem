@@ -26,16 +26,16 @@ impl Iterator for PointIter {
         let idx = self.idx;
         self.idx += 1;
 
-        return self.points.get(idx).map(|x| *x);
+        self.points.get(idx).copied()
     }
 }
 
 impl From<Vec<Point>> for PointIter {
     fn from(value: Vec<Point>) -> Self {
-        return PointIter {
+        PointIter {
             points: value,
             idx: 0,
-        };
+        }
     }
 }
 
@@ -58,6 +58,6 @@ where
                 return true;
             }
         }
-        return false;
+        false
     }
 }
